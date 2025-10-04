@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Projects List</title>
+		<style>
+			body{font-family:Segoe UI,Roboto,Arial;background:#f3f6fb;color:#0b1220;padding:28px}
+			.container{max-width:960px;margin:0 auto}
+			h1{margin:0 0 14px 0;font-size:20px}
+			.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+			.card{background:white;border-radius:8px;border:1px solid #e6eef6;padding:12px;box-shadow:0 6px 18px rgba(12,26,48,0.06)}
+			.card h3{margin:0 0 8px 0;font-size:16px}
+			.meta{font-size:13px;color:#556270;word-break:break-all}
+			.actions{display:flex;gap:8px;margin-top:10px}
+			button{padding:8px 10px;border-radius:8px;border:0;background:#0ea5a4;color:white;cursor:pointer}
+			button.ghost{background:#eef3f6;color:#0b1220}
+			.note{color:#556270;margin-top:10px;font-size:13px}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>Projects</h1>
+			<div id="grid" class="grid" aria-live="polite"></div>
+			<div class="note">Tip: edit <code>window.PROJECTS</code> in the browser console to update the cards.</div>
+		</div>
+
+		<script>
+			// Single global variable that holds the projects data.
+			// Edit this array directly (or from the console) to change the cards shown.
+			// Each item: { name: string, url: string }
+			window.PROJECTS = [
+				{ name: 'Project 1', url: './project1/index.html' },
+			];
+
+			function createCard(item){
+				const card = document.createElement('div'); card.className = 'card';
+				const h = document.createElement('h3'); h.textContent = item.name || '(no name)';
+				const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = item.url || '';
+
+				const actions = document.createElement('div'); actions.className = 'actions';
+				const openBtn = document.createElement('button'); openBtn.textContent = 'Open';
+				openBtn.addEventListener('click', ()=>{
+					try{ window.open(item.url, '_blank'); }catch(e){ alert('Cannot open: '+item.url); }
+				});
+
+				const copyBtn = document.createElement('button'); copyBtn.textContent = 'Copy URL'; copyBtn.className = 'ghost';
+				copyBtn.addEventListener('click', async ()=>{
+					try{ await navigator.clipboard.writeText(item.url || ''); copyBtn.textContent = 'Copied'; setTimeout(()=>copyBtn.textContent='Copy URL',900); }
+					catch(e){ alert('Copy failed'); }
+				});
+
+				actions.appendChild(openBtn); actions.appendChild(copyBtn);
+				card.appendChild(h); card.appendChild(meta); card.appendChild(actions);
+				return card;
+			}
+
+			function renderProjects(){
+				const grid = document.getElementById('grid'); grid.innerHTML = '';
+				const items = Array.isArray(window.PROJECTS) ? window.PROJECTS : [];
+				if(items.length === 0){
+					const empty = document.createElement('div'); empty.className = 'card'; empty.textContent = 'No projects found in window.PROJECTS'; grid.appendChild(empty); return;
+				}
+				items.forEach(it => grid.appendChild(createCard(it)));
+			}
+
+			// Expose helper to global scope so users can update the variable and re-render.
+			window.renderProjects = renderProjects;
+
+			document.addEventListener('DOMContentLoaded', ()=>{
+				renderProjects();
+			});
+		</script>
+	</body>
+</html>
